@@ -1,12 +1,19 @@
-from flask import Flask, render_template, request, redirect, session, send_from_directory
+from flask import Flask, render_template, request, redirect, session, send_from_directory, url_for
 import sqlite3
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = "secret123"
+app.secret_key = "supersecretkey"
 
 UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"pdf", "docx", "pptx", "txt"}
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# Ensure upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- DATABASE ----------------
 def init_db():
@@ -15,7 +22,7 @@ def init_db():
 
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
-        username TEXT,
+        username TEXT UNIQUE,
         password TEXT,
         role TEXT
     )''')
@@ -33,6 +40,10 @@ def init_db():
 
 init_db()
 
+# ---------------- HELPER ----------------
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # ---------------- HOME ----------------
 @app.route("/")
 def index():
@@ -47,12 +58,11 @@ def login(role):
 
         conn = sqlite3.connect("database.db")
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE username=? AND password=? AND role=?",
-                  (username, password, role))
+        c.execute("SELECT * FROM users WHERE username=? AND role=?", (username, role))
         user = c.fetchone()
         conn.close()
 
-        if user:
+        if user and check_password_hash(user[2], password):
             session["user"] = username
             session["role"] = role
             return redirect(f"/dashboard/{role}")
@@ -64,6 +74,9 @@ def login(role):
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard/<role>")
 def dashboard(role):
+    if "user" not in session:
+        return redirect("/")
+
     year = request.args.get("year")
     subject = request.args.get("subject")
 
@@ -82,21 +95,47 @@ def dashboard(role):
 
     return render_template(f"dashboard_{role}.html", files=files)
 
+# ---------------- REGISTER (NEW) ----------------
+@app.route("/register/<role>", methods=["GET", "POST"])
+def register(role):
+    if request.method == "POST":
+        username = request.form["username"]
+        password = generate_password_hash(request.form["password"])
+
+        conn = sqlite3.connect("database.db")
+        c = conn.cursor()
+
+        try:
+            c.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                      (username, password, role))
+            conn.commit()
+        except:
+            return "User already exists"
+
+        conn.close()
+        return redirect(f"/login/{role}")
+
+    return render_template("register.html", role=role)
+
 # ---------------- UPLOAD ----------------
 @app.route("/upload", methods=["POST"])
 def upload():
+    if "user" not in session:
+        return redirect("/")
+
     file = request.files["file"]
     year = request.form["year"]
     subject = request.form["subject"]
 
-    if file:
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
 
         conn = sqlite3.connect("database.db")
         c = conn.cursor()
         c.execute("INSERT INTO files (filename, uploaded_by, year, subject) VALUES (?, ?, ?, ?)",
-                  (file.filename, session["user"], year, subject))
+                  (filename, session["user"], year, subject))
         conn.commit()
         conn.close()
 
@@ -120,7 +159,11 @@ def delete(id):
     file = c.fetchone()
 
     if file:
-        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], file[0]))
+        try:
+            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], file[0]))
+        except:
+            pass
+
         c.execute("DELETE FROM files WHERE id=?", (id,))
         conn.commit()
 
@@ -133,4 +176,6 @@ def logout():
     session.clear()
     return redirect("/")
 
-app.run(debug=True)
+# ---------------- RUN ----------------
+if __name__ == "__main__":
+    app.run(debug=True)
