@@ -3,121 +3,186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Dashboard</title>
+<title>Admin Dashboard</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 body {
-    background-color: #f4f6f9;
-}
-
-/* Navbar */
-.navbar {
-    background-color: #0d6efd;
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6f9;
 }
 
 /* Sidebar */
 .sidebar {
     height: 100vh;
-    background: #1e293b;
+    background: #1e3c72;
     color: white;
-    padding-top: 20px;
+    padding: 20px;
+    position: fixed;
+    width: 230px;
+}
+
+.sidebar h4 {
+    margin-bottom: 30px;
 }
 
 .sidebar a {
     display: block;
     color: white;
-    padding: 12px;
+    padding: 10px;
     text-decoration: none;
+    border-radius: 8px;
 }
 
 .sidebar a:hover {
-    background: #334155;
+    background: rgba(255,255,255,0.2);
+}
+
+/* Main Content */
+.main {
+    margin-left: 240px;
+    padding: 20px;
 }
 
 /* Cards */
-.file-card {
+.card-box {
     border-radius: 12px;
-    transition: 0.3s;
-}
-
-.file-card:hover {
-    transform: scale(1.02);
-}
-
-/* Upload Box */
-.upload-box {
-    border: 2px dashed #0d6efd;
     padding: 20px;
-    border-radius: 10px;
+    color: white;
+}
+
+.bg1 { background: #007bff; }
+.bg2 { background: #28a745; }
+.bg3 { background: #ffc107; }
+
+/* Table */
+.table {
     background: white;
+    border-radius: 10px;
 }
 </style>
+
 </head>
 
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-dark px-3">
-    <span class="navbar-brand d-flex align-items-center">
-        <img src="/static/logo.png" width="40" class="me-2">
-        <strong>HARI BHAI.V.DESAI</strong>
-    </span>
-</nav>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h4>🎓 HBD College</h4>
 
-<div class="container-fluid">
-<div class="row">
-
-    <!-- Sidebar -->
-    <div class="col-md-2 sidebar">
-        <h5 class="text-center">Dashboard</h5>
-        <a href="#">📁 All Files</a>
-        <a href="#">⬆ Upload</a>
-        <a href="#">👤 Profile</a>
-        <a href="/">🚪 Logout</a>
-    </div>
-
-    <!-- Main Content -->
-    <div class="col-md-10 p-4">
-
-        <h3 class="mb-4">👨‍🏫 Teacher Panel</h3>
-
-        <!-- Upload Section -->
-        <div class="upload-box mb-4">
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                <div class="row">
-                    <div class="col-md-8">
-                        <input type="file" name="file" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-primary w-100">Upload File</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Files Grid -->
-        <div class="row">
-        {% for file in files %}
-            <div class="col-md-4 mb-4">
-                <div class="card file-card shadow-sm p-3">
-
-                    <h5>📄 {{ file[1] }}</h5>
-                    <p class="text-muted">Uploaded by {{ file[2] }}</p>
-
-                    <div class="d-flex justify-content-between">
-                        <a href="/download/{{ file[1] }}" class="btn btn-success btn-sm">Download</a>
-                        <a href="/delete/{{ file[0] }}" class="btn btn-danger btn-sm">Delete</a>
-                    </div>
-
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-
-    </div>
+    <a href="#">🏠 Dashboard</a>
+    <a href="#">📤 Upload Notes</a>
+    <a href="#">📂 Manage Files</a>
+    <a href="#">👨‍🎓 Students</a>
+    <a href="#">⚙ Settings</a>
 </div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+    <h2 class="mb-4">Admin Dashboard</h2>
+
+    <!-- STATS -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card-box bg1">
+                <h5>Total Files</h5>
+                <h3>{{ files|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-box bg2">
+                <h5>Departments</h5>
+                <h3>4</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-box bg3">
+                <h5>Uploads Today</h5>
+                <h3>5</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UPLOAD PANEL -->
+    <div class="card p-4 shadow mb-4">
+        <h4>Upload Notes</h4>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+
+            <div class="row mb-3">
+
+                <div class="col">
+                    <select name="branch" class="form-control" required>
+                        <option value="">Branch</option>
+                        <option value="CS">CS</option>
+                        <option value="IT">IT</option>
+                        <option value="MECH">MECH</option>
+                        <option value="CIVIL">CIVIL</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <select name="semester" class="form-control" required>
+                        <option value="">Semester</option>
+                        <option value="Sem1">Sem1</option>
+                        <option value="Sem2">Sem2</option>
+                        <option value="Sem3">Sem3</option>
+                        <option value="Sem4">Sem4</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <input type="text" name="subject" class="form-control" placeholder="Subject" required>
+                </div>
+
+            </div>
+
+            <input type="file" name="file" class="form-control mb-3" required>
+
+            <button class="btn btn-success w-100">Upload</button>
+
+        </form>
+    </div>
+
+    <!-- FILE TABLE -->
+    <div class="card p-4 shadow">
+        <h4>Manage Files</h4>
+
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Branch</th>
+                    <th>Semester</th>
+                    <th>Subject</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for f in files %}
+                <tr>
+                    <td>{{ f[1] }}</td>
+                    <td>{{ f[3] }}</td>
+                    <td>{{ f[4] }}</td>
+                    <td>{{ f[5] }}</td>
+                    <td>
+                        <a href="/uploads/{{ f[1] }}" class="btn btn-sm btn-primary">View</a>
+                        <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
 </div>
 
 </body>
