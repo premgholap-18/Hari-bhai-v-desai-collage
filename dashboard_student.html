@@ -9,74 +9,141 @@
 
 <style>
 body {
-    background-color: #f4f6f9;
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6f9;
 }
-.navbar {
-    background-color: #198754;
-}
+
+/* Sidebar */
 .sidebar {
     height: 100vh;
-    background: #111827;
+    background: #1e3c72;
     color: white;
-    padding-top: 20px;
+    padding: 20px;
+    position: fixed;
+    width: 230px;
 }
+
+.sidebar h4 {
+    margin-bottom: 30px;
+}
+
 .sidebar a {
     display: block;
     color: white;
-    padding: 12px;
+    padding: 10px;
     text-decoration: none;
+    border-radius: 8px;
 }
+
 .sidebar a:hover {
-    background: #374151;
+    background: rgba(255,255,255,0.2);
 }
-.file-card {
+
+/* Main */
+.main {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+/* Navbar */
+.topbar {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Cards */
+.note-card {
     border-radius: 12px;
+    transition: 0.3s;
+}
+
+.note-card:hover {
+    transform: translateY(-5px);
 }
 </style>
+
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark px-3">
-    <span class="navbar-brand d-flex align-items-center">
-        <img src="/static/logo.png" width="40" class="me-2">
-        <strong>HARI BHAI.V.DESAI</strong>
-    </span>
-</nav>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h4>🎓 HARI BHAI DESAI</h4>
 
-<div class="container-fluid">
-<div class="row">
+    <a href="#">🏠 Dashboard</a>
+    <a href="#">📂 My Notes</a>
+    <a href="#">⭐ Favorites</a>
+    <a href="#">⚙ Settings</a>
+</div>
 
-    <!-- Sidebar -->
-    <div class="col-md-2 sidebar">
-        <h5 class="text-center">Student Panel</h5>
-        <a href="#">📁 Notes</a>
-        <a href="#">📚 Papers</a>
-        <a href="/">🚪 Logout</a>
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <h5>Student Dashboard</h5>
+        <span>👤 {{ session['user'] }}</span>
     </div>
 
-    <!-- Main -->
-    <div class="col-md-10 p-4">
+    <!-- FILTER SECTION -->
+    <form method="GET" class="row mb-4">
 
-        <h3 class="mb-4">🎓 Student Dashboard</h3>
-
-        <div class="row">
-        {% for file in files %}
-            <div class="col-md-4 mb-4">
-                <div class="card file-card shadow-sm p-3">
-
-                    <h5>📄 {{ file[1] }}</h5>
-                    <p class="text-muted">Uploaded by {{ file[2] }}</p>
-
-                    <a href="/download/{{ file[1] }}" class="btn btn-primary btn-sm">Download</a>
-
-                </div>
-            </div>
-        {% endfor %}
+        <div class="col">
+            <select name="branch" class="form-control">
+                <option value="">Branch</option>
+                <option value="CS">CS</option>
+                <option value="IT">IT</option>
+                <option value="MECH">MECH</option>
+                <option value="CIVIL">CIVIL</option>
+            </select>
         </div>
 
+        <div class="col">
+            <select name="semester" class="form-control">
+                <option value="">Semester</option>
+                <option value="Sem1">Sem1</option>
+                <option value="Sem2">Sem2</option>
+                <option value="Sem3">Sem3</option>
+                <option value="Sem4">Sem4</option>
+            </select>
+        </div>
+
+        <div class="col">
+            <input name="subject" class="form-control" placeholder="Search Subject">
+        </div>
+
+        <div class="col">
+            <button class="btn btn-primary w-100">Filter</button>
+        </div>
+
+    </form>
+
+    <!-- NOTES GRID -->
+    <div class="row">
+
+        {% for f in files %}
+        <div class="col-md-4 mb-4">
+            <div class="card note-card shadow-sm p-3">
+
+                <h5 class="fw-bold">{{ f[5] }}</h5>
+
+                <p class="text-muted">
+                    {{ f[3] }} | {{ f[4] }}
+                </p>
+
+                <div class="d-flex justify-content-between">
+                    <a href="/uploads/{{ f[1] }}" class="btn btn-success btn-sm">Download</a>
+                    <button class="btn btn-outline-warning btn-sm">⭐</button>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+
     </div>
-</div>
+
 </div>
 
 </body>
