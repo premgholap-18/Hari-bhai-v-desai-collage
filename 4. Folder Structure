@@ -1,0 +1,14 @@
+project/
+│
+├── app.py
+├── database.db
+├── uploads/
+│
+├── templates/
+│   ├── index.html
+│   ├── student_login.html
+│   ├── teacher_login.html
+│   ├── register.html
+│   ├── dashboard_student.html
+│   ├── dashboard_teacher.html
+│
