@@ -14,6 +14,6 @@ college_portal/
 │   ├── dashboard_teacher.html
 │
 ├── static/
-│   └── logo.png
+│   └── style.css
 │
 └── uploads/
