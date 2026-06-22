@@ -1,11 +1,6 @@
 college_portal/
 │
 ├── app.py
-├── config.py
-├── LICENSE
-├── README.md
-├── .gitignore
-│
 ├── templates/
 │   ├── index.html
 │   ├── login_student.html
